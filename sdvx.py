@@ -44,10 +44,16 @@ async def sdvx(interaction: discord.Interaction, level: int, diff: str = None, c
     if cnx is not None and cnx.is_connected():
         cnx.close()
 
-    emoji = discord.utils.get(client.emojis, name = target[2].lower())
-    embed = discord.Embed(title = "おうちボルテガチャ", description = f"【{target[0]} {str(emoji)} Lv.{target[3]}】をプレイしなさい！", color = 0xee17ca)
-    embed.set_footer(text = f"プレイ条件は【{target[4]}】よ") 
-    await interaction.response.send_message(embed = embed)
+    if not target:
+        emoji = discord.utils.get(client.emojis, name = "mxm")
+        embed = discord.Embed(title = "おうちボルテガチャ", description = f"存在しない組み合わせよ！\n罰として【SuddeИDeath {str(emoji)} Lv.20】をプレイしなさい！", color = 0xee17ca)
+        embed.set_footer(text = f"プレイ条件は【楽曲パック vol.20】よ") 
+        await interaction.response.send_message(embed = embed)
+    else:
+        emoji = discord.utils.get(client.emojis, name = target[2].lower())
+        embed = discord.Embed(title = "おうちボルテガチャ", description = f"【{target[0]} {str(emoji)} Lv.{target[3]}】をプレイしなさい！", color = 0xee17ca)
+        embed.set_footer(text = f"プレイ条件は【{target[4]}】よ") 
+        await interaction.response.send_message(embed = embed)
 
 
 # データベースに接続するやつ
@@ -81,9 +87,12 @@ def select(cnx, level, difficulty = None, condition = None):
     cursor = cnx.cursor()
 
     cursor.execute(sql, param)
-    target = random.choice(cursor.fetchall())
+    docs = cursor.fetchall()
 
-    return target
+    if not docs:
+        return []
+    else:
+        return random.choice(docs)
 
 
 if __name__ == '__main__':
